@@ -5,15 +5,22 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-
+import Tkinter,tkFileDialog
+from tkFileDialog import askopenfilename
 import sys
 if sys.version_info[0] < 3:
     import Tkinter as Tk
 else:
     import tkinter as Tk
-
-
-df = pd.read_csv('auto.csv')
+#Creacion de ventana tkinter
+root = Tk.Tk()
+root.wm_title("Coordenadas Paralelas")
+file = tkFileDialog.askopenfile(master=root,mode='rb',title='Choose a file')
+if file != None:
+    data = file.read()
+    file.close()
+    print "I got %d bytes from this file." % len(data)
+df = pd.read_csv(file.name)
 df['horsepower'] = pd.to_numeric(df['horsepower'].replace('?', np.nan))
 df['mpg'] = pd.cut(df['mpg'], [0,8, 16, 24, 32, 50])
 
@@ -23,9 +30,7 @@ cols = ['displacement', 'cylinders', 'horsepower', 'weight', 'acceleration']
 canvas = {}
 colores = ['#0097FF','#00E4FF', '#00FFDC', '#00FF63', '#C9FF00']
 
-#Creacion de ventana tkinter
-root = Tk.Tk()
-root.wm_title("Coordenadas Paralelas")
+
 
 # Set the tick positions and labels on y axis for each plot
 # Tick positions based on normalised data
@@ -96,7 +101,7 @@ def dibujar(columnas = ['displacement', 'cylinders', 'horsepower', 'weight', 'ac
     #toolbar = NavigationToolbar2TkAgg(canvas, root)
     #toolbar.update()
 
-    canvas._tkcanvas.pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
+    canvas._tkcanvas.pack(side=Tk.RIGHT, fill=Tk.BOTH, expand=1)
 
     # Add legend to plot
     plt.legend(
@@ -109,13 +114,44 @@ def dibujar(columnas = ['displacement', 'cylinders', 'horsepower', 'weight', 'ac
         set_ticks_for_axis(dim, ax, ticks=6)
         ax.set_xticklabels([cols[dim]])
 
-    #Dibujar botones
+    #Dibujar botones 
+    botonCargarArchivo = Tk.Button(master=root, text='Abrir Archivo', command=cargar_archivo)
+    botonCargarArchivo.pack(side=Tk.TOP)   
+    lineas = Tk.Label(master=root, text="Lineas")
+    lineas.pack(side=Tk.TOP)    
+    botonColorLineas = Tk.Button(master=root, text='Cambiar Color', command=cambiarColor)
+    botonColorLineas.pack(side=Tk.TOP)
+    botonGrosorLineas= Tk.Button(master=root, text='Cambiar Grosor')
+    botonGrosorLineas.pack(side=Tk.TOP)
+    Ejes = Tk.Label(master=root, text="Ejes")
+    Ejes.pack(side=Tk.TOP)
+    botonGrosorEjes= Tk.Button(master=root, text='Cambiar Grosor')
+    botonGrosorEjes.pack(side=Tk.TOP)
+    Escala = Tk.Label(master=root, text="Escala")
+    Escala.pack(side=Tk.TOP)
+    botonEscala= Tk.Button(master=root, text='Cambiar Escala')
+    botonEscala.pack(side=Tk.TOP)
+    
     botonSalir = Tk.Button(master=root, text='Cerrar', command=_quit)
-    botonSalir.pack(side=Tk.BOTTOM)
+    botonSalir.pack(side=Tk.TOP)
 
-    botonColor = Tk.Button(master=root, text='Cambiar Color', command=cambiarColor)
-    botonColor.pack(side=Tk.BOTTOM)
+def cargar_archivo():
+    file = tkFileDialog.askopenfile(master=root,mode='rb',title='Choose a file')
+    if file != None:
+           data = file.read()
+           file.close()
+           print "I got %d bytes from this file." % len(data)
 
+    global df
+    df = pd.read_csv(file.name)
+    df['horsepower'] = pd.to_numeric(df['horsepower'].replace('?', np.nan))
+    df['mpg'] = pd.cut(df['mpg'], [0,8, 16, 24, 32, 50])
+    if canvas != {}:
+        #Si el canvas ya existe borra todos los elementos de tkinter
+        for ele in root.winfo_children():
+          ele.destroy()
+    dibujar()
+    
 def _quit():
     root.quit()
     root.destroy()
