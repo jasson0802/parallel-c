@@ -12,6 +12,31 @@ if sys.version_info[0] < 3:
     import Tkinter as Tk
 else:
     import tkinter as Tk
+
+def crearListaColore(cantidad):
+    lista = []
+    if(cantidad == 6):
+        lista=['#0097FF','#00E4FF', '#00FFDC', '#00FF63', '#C9FF00','#0097FF']
+    elif(cantidad == 5):
+        lista=['#2F939E','#EB0E87', '#15D6EB', '#EBD53F', '#9E8F28']
+    elif(cantidad == 4):
+        lista=['#2F939E','#EB0E87', '#15D6EB', '#EBD53F']
+    elif(cantidad == 3):
+        lista=['#2F939E','#EB0E87', '#15D6EB']
+    elif(cantidad == 2):
+        lista=['#2F939E','#EB0E87']
+    elif(cantidad == 1):
+        lista=['#2F939E']
+    return lista
+def crearListaEscala(cantidad):
+    lista=[]
+    if(cantidad == 7):
+        lista=[0,8, 16, 24, 32, 50,60]
+    elif(cantidad == 6):
+        lista=[0,8, 16, 24, 32, 50]
+    elif(cantidad == 5):
+        lista=[0,8, 16, 24, 32, 50]
+    return lista
 #Creacion de ventana tkinter
 root = Tk.Tk()
 root.wm_title("Coordenadas Paralelas")
@@ -21,17 +46,23 @@ if file != None:
     file.close()
     print "I got %d bytes from this file." % len(data)
 df = pd.read_csv(file.name)
-df['horsepower'] = pd.to_numeric(df['horsepower'].replace('?', np.nan))
-df['mpg'] = pd.cut(df['mpg'], [0,8, 16, 24, 32, 50])
+#Leer los titulos de las columnas
+global cols 
+cols = []
+for linea in df:
+    cols.append(linea)
+cols = cols[2:]
+#df['horsepower'] = pd.to_numeric(df['horsepower'].replace('?', np.nan))
+listaEscala = crearListaEscala(len(cols)+1)
+df['mpg'] = pd.cut(df['mpg'], listaEscala)
+
+
 
 #Asignacion de variables globales
 min_max_range = {}
-cols = ['displacement', 'cylinders', 'horsepower', 'weight', 'acceleration']
+#cols = ['displacement', 'cylinders', 'horsepower', 'weight', 'acceleration']
 canvas = {}
-colores = ['#0097FF','#00E4FF', '#00FFDC', '#00FF63', '#C9FF00']
-
-
-
+colores = crearListaColore(len(cols))
 # Set the tick positions and labels on y axis for each plot
 # Tick positions based on normalised data
 # Tick labels are based on original data
@@ -51,14 +82,14 @@ def set_ticks_for_axis(dim, ax, ticks):
 #plt.show()
 
 #Metodo principal donde se dibujan todos los elementos
-def dibujar(columnas = ['displacement', 'cylinders', 'horsepower', 'weight', 'acceleration']):
+def dibujar(columnas = cols):
     cols = columnas
     x = [i for i, _ in enumerate(cols)]
     colours = colores
 
     # create dict of categories: colours
     colours = {df['mpg'].cat.categories[i]: colours[i] for i, _ in enumerate(df['mpg'].cat.categories)}
-
+    
     fig, axes = plt.subplots(1, len(x)-1, sharey=False, figsize=(15,5))
      
     # Create (X-1) sublots along x axis
@@ -75,7 +106,7 @@ def dibujar(columnas = ['displacement', 'cylinders', 'horsepower', 'weight', 'ac
     for i, ax in enumerate(axes):
         for idx in df.index:
             mpg_category = df.loc[idx, 'mpg']
-            ax.plot(x, df.loc[idx, cols],colours[mpg_category],linewidth=2.5)
+            ax.plot(x, df.loc[idx, cols],colours[mpg_category],linewidth=0.5) #Aqui se cambia el grueso de la linea
         ax.set_xlim([x[i], x[i+1]])
 
 
@@ -144,8 +175,13 @@ def cargar_archivo():
 
     global df
     df = pd.read_csv(file.name)
-    df['horsepower'] = pd.to_numeric(df['horsepower'].replace('?', np.nan))
-    df['mpg'] = pd.cut(df['mpg'], [0,8, 16, 24, 32, 50])
+    #df['horsepower'] = pd.to_numeric(df['horsepower'].replace('?', np.nan))
+    cols = []
+    for linea in df:
+        cols.append(linea)
+    cols = cols[2:]
+    listaEscala = crearListaEscala(len(cols)+1)
+    df['mpg'] = pd.cut(df['mpg'],listaEscala)
     if canvas != {}:
         #Si el canvas ya existe borra todos los elementos de tkinter
         for ele in root.winfo_children():
@@ -156,6 +192,8 @@ def _quit():
     root.quit()
     root.destroy()
 
+    
+    
 #Metodo para cambiar colores
 def cambiarColor():
     #Valida si el canvas ya existe
@@ -166,7 +204,7 @@ def cambiarColor():
 
         #Resetea los colores
         global colores
-        colores = ['#2F939E','#EB0E87', '#15D6EB', '#EBD53F', '#9E8F28']
+        colores = crearListaColore(len(cols))
 
         #Vuelve a generar todos los elementos
         dibujar()
