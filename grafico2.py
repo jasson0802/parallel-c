@@ -6,6 +6,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import Tkinter,tkFileDialog
+import ttk
+from tkcolorpicker import askcolor
+from functools import partial
+
 from tkFileDialog import askopenfilename
 import sys
 if sys.version_info[0] < 3:
@@ -40,6 +44,9 @@ def crearListaEscala(cantidad):
 #Creacion de ventana tkinter
 root = Tk.Tk()
 root.wm_title("Coordenadas Paralelas")
+#root.style = ttk.Style()
+#root.style.theme_use("vista")
+
 file = tkFileDialog.askopenfile(master=root,mode='rb',title='Choose a file')
 if file != None:
     data = file.read()
@@ -192,15 +199,38 @@ def _quit():
     root.quit()
     root.destroy()
 
+def cambiarColor():
+    window = Tk.Toplevel(root)
+    for nombreCol in cols:
+        Tk.Label(window,text=nombreCol).grid()
+        Tk.Button(window,text="Cambiar: " + nombreCol, command = partial(preguntarColor, nombreCol) ).grid()
+
+
+#Se pasa por parametro el nombre de la columna
+def preguntarColor(nombreCol):
+    #Se busca el indice de la columna
+    index = cols.index(nombreCol)
+    colorElegido = askcolor((255, 255, 0), parent=root, title="Escoja un color")
+
+    #Se cambia el color en la posicion encontrada por el color elegido
+    colores[index] = colorElegido[1]
     
+    print(colorElegido)
+
+    limpiarVentana()
+    dibujar()
+
+
+def limpiarVentana():
+    for ele in root.winfo_children():
+          ele.destroy()
     
 #Metodo para cambiar colores
-def cambiarColor():
+def actualizarColor():
     #Valida si el canvas ya existe
     if canvas != {}:
         #Si el canvas ya existe borra todos los elementos de tkinter
-        for ele in root.winfo_children():
-          ele.destroy()
+        limpiarVentana()
 
         #Resetea los colores
         global colores
