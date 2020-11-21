@@ -1,7 +1,7 @@
 from matplotlib import ticker
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-
+from Tkinter import *
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -67,6 +67,8 @@ df['mpg'] = pd.cut(df['mpg'], listaEscala)
 
 #Asignacion de variables globales
 min_max_range = {}
+global grosor
+grosor = 1.5
 #cols = ['displacement', 'cylinders', 'horsepower', 'weight', 'acceleration']
 canvas = {}
 colores = crearListaColore(len(cols))
@@ -113,7 +115,7 @@ def dibujar(columnas = cols):
     for i, ax in enumerate(axes):
         for idx in df.index:
             mpg_category = df.loc[idx, 'mpg']
-            ax.plot(x, df.loc[idx, cols],colours[mpg_category],linewidth=0.5) #Aqui se cambia el grueso de la linea
+            ax.plot(x, df.loc[idx, cols],colours[mpg_category],linewidth=grosor) #Aqui se cambia el grueso de la linea
         ax.set_xlim([x[i], x[i+1]])
 
 
@@ -159,7 +161,7 @@ def dibujar(columnas = cols):
     lineas.pack(side=Tk.TOP)    
     botonColorLineas = Tk.Button(master=root, text='Cambiar Color', command=cambiarColor)
     botonColorLineas.pack(side=Tk.TOP)
-    botonGrosorLineas= Tk.Button(master=root, text='Cambiar Grosor')
+    botonGrosorLineas= Tk.Button(master=root, text='Cambiar Grosor', command=cambiarGrosor)
     botonGrosorLineas.pack(side=Tk.TOP)
     Ejes = Tk.Label(master=root, text="Ejes")
     Ejes.pack(side=Tk.TOP)
@@ -173,6 +175,19 @@ def dibujar(columnas = cols):
     botonSalir = Tk.Button(master=root, text='Cerrar', command=_quit)
     botonSalir.pack(side=Tk.TOP)
 
+def cambiarGrosor():
+    window = Tk.Toplevel(root)
+    w = Spinbox(window,from_=0, to=100)
+    w.pack()
+    botonAceptar = Tk.Button(window, text='Aceptar', command=partial(aceptar,w))
+    botonAceptar.pack()
+    
+def aceptar(w):
+    global grosor
+    grosor = w.get()
+    limpiarVentana()
+    dibujar()
+    
 def cargar_archivo():
     file = tkFileDialog.askopenfile(master=root,mode='rb',title='Choose a file')
     if file != None:
