@@ -1,7 +1,7 @@
 from matplotlib import ticker
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-
+from Tkinter import *
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -67,9 +67,13 @@ listaEscala = crearListaEscala(len(cols)+1)
 df[categoria] = pd.cut(df[categoria], listaEscala)
 
 #Asignacion de variables globales
-min_max_range = {}
+
+global grosor
+grosor = 1.5
+#cols = ['displacement', 'cylinders', 'horsepower', 'weight', 'acceleration']
 canvas = {}
 colores = crearListaColore(len(cols))
+min_max_range = {}
 
 # Set the tick positions and labels on y axis for each plot
 # Tick positions based on normalised data
@@ -111,7 +115,7 @@ def dibujar():
             #Extraer el mpg de la fila
             mpg_category = df.loc[idx, categoria]
             #Dibujar una linea entre cada columna para la fila dada
-            ax.plot(x, df.loc[idx, cols], colours[mpg_category],linewidth=0.5) #Aqui se cambia el grueso de la linea
+            ax.plot(x, df.loc[idx, cols],colours[mpg_category],linewidth=grosor) #Aqui se cambia el grueso de la linea
         ax.set_xlim([x[i], x[i+1]])
 
 
@@ -153,7 +157,7 @@ def dibujar():
     lineas.pack(side=Tk.TOP)    
     botonColorLineas = Tk.Button(master=root, text='Cambiar Color', command=cambiarColor)
     botonColorLineas.pack(side=Tk.TOP)
-    botonGrosorLineas= Tk.Button(master=root, text='Cambiar Grosor')
+    botonGrosorLineas= Tk.Button(master=root, text='Cambiar Grosor', command=cambiarGrosor)
     botonGrosorLineas.pack(side=Tk.TOP)
     Ejes = Tk.Label(master=root, text="Ejes")
     Ejes.pack(side=Tk.TOP)
@@ -169,6 +173,19 @@ def dibujar():
     botonSalir = Tk.Button(master=root, text='Cerrar', command=_quit)
     botonSalir.pack(side=Tk.TOP)
 
+def cambiarGrosor():
+    window = Tk.Toplevel(root)
+    w = Spinbox(window,from_=0, to=100)
+    w.pack()
+    botonAceptar = Tk.Button(window, text='Aceptar', command=partial(aceptar,w))
+    botonAceptar.pack()
+    
+def aceptar(w):
+    global grosor
+    grosor = w.get()
+    limpiarVentana()
+    dibujar()
+    
 def cargar_archivo():
     file = tkFileDialog.askopenfile(master=root,mode='rb',title='Choose a file')
     if file != None:
