@@ -9,6 +9,8 @@ import Tkinter,tkFileDialog
 import ttk
 from tkcolorpicker import askcolor
 from functools import partial
+from colormap import rgb2hex
+import random
 
 from tkFileDialog import askopenfilename
 import sys
@@ -19,19 +21,12 @@ else:
 
 def crearListaColore(cantidad):
     lista = []
-    if(cantidad == 6):
-        lista=['#0097FF','#00E4FF', '#00FFDC', '#00FF63', '#C9FF00','#0097FF']
-    elif(cantidad == 5):
-        lista=['#2F939E','#EB0E87', '#15D6EB', '#EBD53F', '#9E8F28']
-    elif(cantidad == 4):
-        lista=['#2F939E','#EB0E87', '#15D6EB', '#EBD53F']
-    elif(cantidad == 3):
-        lista=['#2F939E','#EB0E87', '#15D6EB']
-    elif(cantidad == 2):
-        lista=['#2F939E','#EB0E87']
-    elif(cantidad == 1):
-        lista=['#2F939E']
+    for x in range(cantidad):
+        tempColor = rgb2hex(random.randint(1, 30)*x, random.randint(1, 30)*x, random.randint(1, 30)*x)
+        lista.append(tempColor)
+    print lista
     return lista
+
 def crearListaEscala(cantidad):
     lista=[]
     if(cantidad == 7):
@@ -41,35 +36,41 @@ def crearListaEscala(cantidad):
     elif(cantidad == 5):
         lista=[0,8, 16, 24, 32, 50]
     return lista
+
 #Creacion de ventana tkinter
 root = Tk.Tk()
 root.wm_title("Coordenadas Paralelas")
-#root.style = ttk.Style()
-#root.style.theme_use("vista")
 
 file = tkFileDialog.askopenfile(master=root,mode='rb',title='Choose a file')
 if file != None:
     data = file.read()
     file.close()
     print "I got %d bytes from this file." % len(data)
+
+#Asignar los datos a variable df
+global df
 df = pd.read_csv(file.name)
+#pd.set_option('display.max_columns', None)
+
 #Leer los titulos de las columnas
 global cols 
 cols = []
 for linea in df:
     cols.append(linea)
 cols = cols[2:]
-#df['horsepower'] = pd.to_numeric(df['horsepower'].replace('?', np.nan))
+
+categoria = 'mpg'
+
 listaEscala = crearListaEscala(len(cols)+1)
-df['mpg'] = pd.cut(df['mpg'], listaEscala)
 
-
+#Reducir valores de columna a evaluar
+df[categoria] = pd.cut(df[categoria], listaEscala)
 
 #Asignacion de variables globales
 min_max_range = {}
-#cols = ['displacement', 'cylinders', 'horsepower', 'weight', 'acceleration']
 canvas = {}
 colores = crearListaColore(len(cols))
+
 # Set the tick positions and labels on y axis for each plot
 # Tick positions based on normalised data
 # Tick labels are based on original data
@@ -84,24 +85,19 @@ def set_ticks_for_axis(dim, ax, ticks):
     ax.yaxis.set_ticks(ticks)
     ax.set_yticklabels(tick_labels)
 
-
-#plt.title("Values of car attributes by MPG category")
-#plt.show()
-
 #Metodo principal donde se dibujan todos los elementos
-def dibujar(columnas = cols):
-    cols = columnas
+def dibujar():
+    #Asignar los datos a variable df
+    global listaEscala
+    listaEscala = crearListaEscala(len(cols)+1)
+    
     x = [i for i, _ in enumerate(cols)]
-    colours = colores
 
-    # create dict of categories: colours
-    colours = {df['mpg'].cat.categories[i]: colours[i] for i, _ in enumerate(df['mpg'].cat.categories)}
+    # Crear diccionario de categorias: colores {Interval(24, 32, closed='right'): '#EBD53F', Interval(32, 50, closed='right'): '#9E8F28', Interval(16, 24, closed='right'): '#15D6EB'}
+    colours = {df[categoria].cat.categories[i]: colores[i] for i, _ in enumerate(df[categoria].cat.categories)}
     
     fig, axes = plt.subplots(1, len(x)-1, sharey=False, figsize=(15,5))
      
-    # Create (X-1) sublots along x axis
-    #fig, axes = plt.subplots()
-
     # Get min, max and range for each column
     # Normalize the data for each column
     for col in cols:
@@ -109,42 +105,40 @@ def dibujar(columnas = cols):
         min_max_range[col] = [df[col].min(), df[col].max(), np.ptp(df[col])]
         df[col] = np.true_divide(df[col] - df[col].min(), np.ptp(df[col]))
 
-    # Plot each row
+    # Dibujar cada linea basado en valor de categoria
     for i, ax in enumerate(axes):
         for idx in df.index:
-            mpg_category = df.loc[idx, 'mpg']
-            ax.plot(x, df.loc[idx, cols],colours[mpg_category],linewidth=0.5) #Aqui se cambia el grueso de la linea
+            #Extraer el mpg de la fila
+            mpg_category = df.loc[idx, categoria]
+            #Dibujar una linea entre cada columna para la fila dada
+            ax.plot(x, df.loc[idx, cols], colours[mpg_category],linewidth=0.5) #Aqui se cambia el grueso de la linea
         ax.set_xlim([x[i], x[i+1]])
 
 
-    # Move the final axis' ticks to the right-hand side
+    # Dibujar escala al lado derecho
     ax = plt.twinx(axes[-1])
     dim = len(axes)
     ax.xaxis.set_major_locator(ticker.FixedLocator([x[-2], x[-1]]))
     set_ticks_for_axis(dim, ax, ticks=6)
     ax.set_xticklabels([cols[-2], cols[-1]])
-    # Remove space between subplots
+    
+    # Quitar espacio entre los dibujos de linea-columna
     plt.subplots_adjust(wspace=0)
 
     #Creacion componentes tkinter
-
     plt.rcParams['toolbar'] = 'None'
 
     global canvas
     canvas = FigureCanvasTkAgg(fig, master=root)
     canvas._tkcanvas.pack_forget()
     canvas.draw()
-    #canvas.get_tk_widget().pack(side=Tk.TOP, fill=Tk.BOTH, expand=1)
-
-    #toolbar = NavigationToolbar2TkAgg(canvas, root)
-    #toolbar.update()
 
     canvas._tkcanvas.pack(side=Tk.RIGHT, fill=Tk.BOTH, expand=1)
 
-    # Add legend to plot
+    # Dibujar guia de colores en la parte superior derecha
     plt.legend(
-        [plt.Line2D((0,1),(0,0), color=colours[cat]) for cat in df['mpg'].cat.categories],
-        df['mpg'].cat.categories,
+        [plt.Line2D((0,1),(0,0), color=colours[cat]) for cat in df[categoria].cat.categories],
+        df[categoria].cat.categories,
         bbox_to_anchor=(1.2, 1), loc=2, borderaxespad=0.)
 
     for dim, ax in enumerate(axes):
@@ -165,6 +159,8 @@ def dibujar(columnas = cols):
     Ejes.pack(side=Tk.TOP)
     botonGrosorEjes= Tk.Button(master=root, text='Cambiar Grosor')
     botonGrosorEjes.pack(side=Tk.TOP)
+    botonOrdenEjes= Tk.Button(master=root, text='Cambiar orden', command=ventanaOrden)
+    botonOrdenEjes.pack(side=Tk.TOP)
     Escala = Tk.Label(master=root, text="Escala")
     Escala.pack(side=Tk.TOP)
     botonEscala= Tk.Button(master=root, text='Cambiar Escala')
@@ -188,7 +184,7 @@ def cargar_archivo():
         cols.append(linea)
     cols = cols[2:]
     listaEscala = crearListaEscala(len(cols)+1)
-    df['mpg'] = pd.cut(df['mpg'],listaEscala)
+    df[categoria] = pd.cut(df[categoria], listaEscala)
     if canvas != {}:
         #Si el canvas ya existe borra todos los elementos de tkinter
         for ele in root.winfo_children():
@@ -199,23 +195,81 @@ def _quit():
     root.quit()
     root.destroy()
 
+def ventanaOrden():
+    posX = 200
+    posY = 200
+    window = Tk.Toplevel(root)
+    window.geometry('1000x500')
+    for nombreCol in cols:
+        tempLabel = Tk.Label(window,text=nombreCol)
+        btnIzq = Tk.Button(window,text="<-" , command = partial(moverIzquierda, nombreCol))
+        btnDer = Tk.Button(window,text="->" , command = partial(moverDerecha, nombreCol))
+        tempLabel.pack()
+        tempLabel.place(x =posX, y = posY)
+        btnIzq.place(x =posX-10, y = posY+ 50)
+        btnDer.place(x =posX+10, y = posY+ 50);
+        posX += 100 
+
+
 def cambiarColor():
     window = Tk.Toplevel(root)
-    for nombreCol in cols:
-        Tk.Label(window,text=nombreCol).grid()
-        Tk.Button(window,text="Cambiar: " + nombreCol, command = partial(preguntarColor, nombreCol) ).grid()
-
+    Tk.Label(window,text="Colores para rangos de valores de columna " + categoria).grid()
+    for rango in listaEscala:
+        index = listaEscala.index(rango)
+        if(index < len(listaEscala)-1):
+            Tk.Label(window,text="Rango " + str(rango) + " - " + str(listaEscala[index+1])).grid()
+            Tk.Button(window,text="Cambiar color", command = partial(preguntarColor, rango)).grid()
+        
 
 #Se pasa por parametro el nombre de la columna
-def preguntarColor(nombreCol):
+def preguntarColor(nombreRango):
     #Se busca el indice de la columna
-    index = cols.index(nombreCol)
+    index = listaEscala.index(nombreRango)
     colorElegido = askcolor((255, 255, 0), parent=root, title="Escoja un color")
 
     #Se cambia el color en la posicion encontrada por el color elegido
     colores[index] = colorElegido[1]
     
     print(colorElegido)
+
+    limpiarVentana()
+    dibujar()
+
+
+#Se pasa por parametro el nombre de la columna
+def moverDerecha(nombreCol):
+    #Se busca el indice de la columna
+    index = cols.index(nombreCol)
+
+    if index < len(cols)-1:
+        tempCol = cols[index+1]
+        cols[index+1] = cols[index]
+        cols[index] = tempCol
+    else:
+        tempCol = cols[0]
+        cols[0] = cols[index]
+        cols[index] = tempCol
+    
+    print(cols)
+
+    limpiarVentana()
+    dibujar()
+
+#Se pasa por parametro el nombre de la columna
+def moverIzquierda(nombreCol):
+       #Se busca el indice de la columna
+    index = cols.index(nombreCol)
+
+    if index > 0:
+        tempCol = cols[index-1]
+        cols[index-1] = cols[index]
+        cols[index] = tempCol
+    else:
+        tempCol = cols[len(cols)-1]
+        cols[len(cols)-1] = cols[index]
+        cols[index] = tempCol
+    
+    print(cols)
 
     limpiarVentana()
     dibujar()
