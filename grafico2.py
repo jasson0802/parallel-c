@@ -27,7 +27,6 @@ def crearListaColore(cantidad):
         b = random.randint(1, 30)*x
         tempColor = rgb2hex(r if r<= 255 else 255,g if g<= 255 else 255,b if b<= 255 else 255)
         lista.append(tempColor)
-    print lista
     return lista
 
 def crearListaEscala(listaValores, cantidad):
@@ -50,7 +49,7 @@ file = tkFileDialog.askopenfile(master=root,mode='rb',title='Choose a file')
 if file != None:
     data = file.read()
     file.close()
-    print "I got %d bytes from this file." % len(data)
+    
 
 #Asignar los datos a variable df
 global df
@@ -63,7 +62,8 @@ cols = []
 for linea in df:
     cols.append(linea)
 cols = cols[2:]
-
+global bandera
+bandera = True
 categoria = 'mpg'
 
 valoresCategoria = df[categoria]
@@ -110,13 +110,16 @@ def dibujar():
     colours = {df[categoria].cat.categories[i]: colores[i] for i, _ in enumerate(df[categoria].cat.categories)}
     
     fig, axes = plt.subplots(1, len(x)-1, sharey=False, figsize=(15,5))
-     
+    
     # Get min, max and range for each column
     # Normalize the data for each column
-    for col in cols:
-        global min_max_range
-        min_max_range[col] = [df[col].min(), df[col].max(), np.ptp(df[col])]
-        df[col] = np.true_divide(df[col] - df[col].min(), np.ptp(df[col]))
+    if(bandera):
+      global bandera
+      bandera = False
+      for col in cols:
+          global min_max_range
+          min_max_range[col] = [df[col].min(), df[col].max(), np.ptp(df[col])]
+          df[col] = np.true_divide(df[col] - df[col].min(), np.ptp(df[col]))
 
     # Dibujar cada linea basado en valor de categoria
     for i, ax in enumerate(axes):
@@ -200,7 +203,6 @@ def cargar_archivo():
     if file != None:
            data = file.read()
            file.close()
-           print "I got %d bytes from this file." % len(data)
 
     global df
     df = pd.read_csv(file.name)
@@ -309,8 +311,7 @@ def preguntarColor(nombreRango):
 
     #Se cambia el color en la posicion encontrada por el color elegido
     colores[index] = colorElegido[1]
-    
-    print(colorElegido)
+  
 
     limpiarVentana()
     dibujar()
@@ -348,8 +349,6 @@ def moverIzquierda(nombreCol):
         tempCol = cols[len(cols)-1]
         cols[len(cols)-1] = cols[index]
         cols[index] = tempCol
-    
-    print(cols)
 
     limpiarVentana()
     dibujar()
