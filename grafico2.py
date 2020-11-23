@@ -69,15 +69,17 @@ for linea in df:
     cols.append(linea)
 cols = cols[2:]
 
-#for linea in cols:   
-#    df[linea] = pd.to_numeric(df[linea].replace(' ', 0))
-#    df[linea] = pd.to_numeric(df[linea].replace('NA', 0))
-#    df[linea] = pd.to_numeric(df[linea].replace('?', 0))
+
 categoria = 'mpg'
 
 valoresCategoria = df[categoria]
 dfOriginal = df
-
+for linea in cols:
+    print linea
+    df[linea] = pd.to_numeric(df[linea].replace(' ', 0))
+    df[linea] = pd.to_numeric(df[linea].replace('', 0))
+    df[linea] = pd.to_numeric(df[linea].replace('NA', 0))
+    df[linea] = pd.to_numeric(df[linea].replace('?', 0))
 listaEscala = crearListaEscala(valoresCategoria, len(cols))
 
 #Reducir valores de columna a evaluar
@@ -93,6 +95,8 @@ global colores
 colores = crearListaColore(len(cols))
 min_max_range = {}
 
+
+    
 # Set the tick positions and labels on y axis for each plot
 # Tick positions based on normalised data
 # Tick labels are based on original data
