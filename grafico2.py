@@ -50,7 +50,6 @@ file = tkFileDialog.askopenfile(master=root,mode='rb',title='Choose a file')
 if file != None:
     data = file.read()
     file.close()
-    
 
 #Asignar los datos a variable df
 global df
@@ -58,10 +57,10 @@ df = pd.read_csv(file.name)
 #pd.set_option('display.max_columns', None)
 
 global grosorEjes
-grosorEjes = 10
+grosorEjes = 1
 
 global colorEjes
-colorEjes = "gold"
+colorEjes = "black"
 
 #Leer los titulos de las columnas
 global cols 
@@ -69,8 +68,11 @@ cols = []
 for linea in df:
     cols.append(linea)
 cols = cols[2:]
-global bandera
-bandera = True
+
+#for linea in cols:   
+#    df[linea] = pd.to_numeric(df[linea].replace(' ', 0))
+#    df[linea] = pd.to_numeric(df[linea].replace('NA', 0))
+#    df[linea] = pd.to_numeric(df[linea].replace('?', 0))
 categoria = 'mpg'
 
 valoresCategoria = df[categoria]
@@ -84,7 +86,7 @@ df[categoria] = pd.cut(valoresCategoria, listaEscala)
 #Asignacion de variables globales
 
 global grosor
-grosor = 1.5
+grosor = 1
 #cols = ['displacement', 'cylinders', 'horsepower', 'weight', 'acceleration']
 canvas = {}
 global colores 
@@ -125,20 +127,19 @@ def dibujar():
     
     # Get min, max and range for each column
     # Normalize the data for each column
-    if(bandera):
-      global bandera
-      bandera = False
-      for col in cols:
-          global min_max_range
-          min_max_range[col] = [df[col].min(), df[col].max(), np.ptp(df[col])]
-          df[col] = np.true_divide(df[col] - df[col].min(), np.ptp(df[col]))
+    for col in cols:
+        global min_max_range
+        min_max_range[col] = [df[col].min(), df[col].max(), np.ptp(df[col])]
+        df[col] = np.true_divide(df[col] - df[col].min(), np.ptp(df[col]))
 
-
+    
     # Dibujar cada linea basado en valor de categoria
     for i, ax in enumerate(axes):
         for idx in df.index:
             #Extraer el mpg de la fila
             mpg_category = df.loc[idx, categoria]
+            #print categoria
+            #print idx
             #Dibujar una linea entre cada columna para la fila dada
             ax.plot(x, df.loc[idx, cols],colours[mpg_category],linewidth=grosor) #Aqui se cambia el grueso de la linea
         ax.set_xlim([x[i], x[i+1]])
@@ -160,7 +161,7 @@ def dibujar():
 
     #Creacion componentes tkinter
     plt.rcParams['toolbar'] = 'None'
-    plt.rcParams['axes.linewidth'] = 10
+    plt.rcParams['axes.linewidth'] = grosorEjes
 
     global canvas
     canvas = FigureCanvasTkAgg(fig, master=root)
@@ -191,7 +192,9 @@ def dibujar():
     botonGrosorLineas.pack(side=Tk.TOP)
     Ejes = Tk.Label(master=root, text="Ejes")
     Ejes.pack(side=Tk.TOP)
-    botonGrosorEjes= Tk.Button(master=root, text='Cambiar Grosor')
+    botonColorEjes= Tk.Button(master=root, text='Cambiar Color', command=cambiarColorEjes)
+    botonColorEjes.pack(side=Tk.TOP)    
+    botonGrosorEjes= Tk.Button(master=root, text='Cambiar Grosor', command=cambiarGrosorEjes)
     botonGrosorEjes.pack(side=Tk.TOP)
     botonOrdenEjes= Tk.Button(master=root, text='Cambiar orden', command=ventanaOrden)
     botonOrdenEjes.pack(side=Tk.TOP)
@@ -203,6 +206,27 @@ def dibujar():
     botonSalir = Tk.Button(master=root, text='Cerrar', command=_quit)
     botonSalir.pack(side=Tk.TOP)
 
+def cambiarColorEjes():
+    window = Tk.Toplevel(root)
+    colorElegido = askcolor((255, 255, 0), parent=root, title="Escoja un color")
+    global colorEjes
+    colorEjes = colorElegido[1]
+    limpiarVentana()
+    dibujar()
+    
+def cambiarGrosorEjes():
+    window = Tk.Toplevel(root)
+    w = Spinbox(window,from_=0, to=100)
+    w.pack()
+    botonAceptar = Tk.Button(window, text='Aceptar', command=partial(aceptar2,w))
+    botonAceptar.pack()
+
+def aceptar2(w):
+    global grosorEjes
+    grosorEjes = w.get()
+    limpiarVentana()
+    dibujar()
+    
 def cambiarGrosor():
     window = Tk.Toplevel(root)
     w = Spinbox(window,from_=0, to=100)
