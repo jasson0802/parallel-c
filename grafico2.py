@@ -22,9 +22,11 @@ else:
 def crearListaColore(cantidad):
     lista = []
     for x in range(cantidad):
-        tempColor = rgb2hex(random.randint(1, 30)*x, random.randint(1, 30)*x, random.randint(1, 30)*x)
+        r = random.randint(1, 30)*x
+        g = random.randint(1, 30)*x
+        b = random.randint(1, 30)*x
+        tempColor = rgb2hex(r if r<= 255 else 255,g if g<= 255 else 255,b if b<= 255 else 255)
         lista.append(tempColor)
-
     print lista
     return lista
 
@@ -77,6 +79,7 @@ global grosor
 grosor = 1.5
 #cols = ['displacement', 'cylinders', 'horsepower', 'weight', 'acceleration']
 canvas = {}
+global colores 
 colores = crearListaColore(len(cols))
 min_max_range = {}
 
@@ -156,13 +159,13 @@ def dibujar():
         set_ticks_for_axis(dim, ax, ticks=6)
         ax.set_xticklabels([cols[dim]])
 
-    #Dibujar botones 
-    botonCargarArchivo = Tk.Button(master=root, text='Abrir Archivo', command=cargar_archivo)
-    botonCargarArchivo.pack(side=Tk.TOP)   
+    #Dibujar botones   
     lineas = Tk.Label(master=root, text="Lineas")
     lineas.pack(side=Tk.TOP)    
-    botonColorLineas = Tk.Button(master=root, text='Cambiar Color', command=cambiarColor)
+    botonColorLineas = Tk.Button(master=root, text='Cambiar Color ', command=cambiarColor)
     botonColorLineas.pack(side=Tk.TOP)
+    botonColorLineas2 = Tk.Button(master=root, text='Cambiar Paleta', command=cambiarColorPaleta)
+    botonColorLineas2.pack(side=Tk.TOP)
     botonGrosorLineas= Tk.Button(master=root, text='Cambiar Grosor', command=cambiarGrosor)
     botonGrosorLineas.pack(side=Tk.TOP)
     Ejes = Tk.Label(master=root, text="Ejes")
@@ -231,8 +234,62 @@ def ventanaOrden():
         tempLabel.place(x =posX, y = posY)
         btnIzq.place(x =posX-10, y = posY+ 50)
         btnDer.place(x =posX+10, y = posY+ 50);
-        posX += 100 
+        posX += 100
 
+
+
+
+
+
+
+def crearPaletaAzules(cantidad):
+    lista = []
+    for x in range(cantidad):
+        r = random.randint(1, 10)*x
+        g = random.randint(1, 10)*x
+        b = random.randint(1, 100)*x
+        tempColor = rgb2hex(r if r<= 255 else 255,g if g<= 255 else 255,b if b<= 255 else 255)
+        lista.append(tempColor)
+    global colores
+    colores =  lista
+    limpiarVentana()
+    dibujar()
+
+def crearPaletaVerdes(cantidad):
+    lista = []
+    for x in range(cantidad):
+        r = random.randint(1, 10)*x
+        g = random.randint(1, 100)*x
+        b = random.randint(1, 10)*x
+        tempColor = rgb2hex(r if r<= 255 else 255,g if g<= 255 else 255,b if b<= 255 else 255)
+        lista.append(tempColor)
+    global colores
+    colores =  lista
+    limpiarVentana()
+    dibujar()
+
+def crearPaletaRojos(cantidad):
+    lista = []
+    for x in range(cantidad):
+        r = random.randint(1, 100)*x
+        g = random.randint(1, 10)*x
+        b = random.randint(1, 10)*x
+        tempColor = rgb2hex(r if r<= 255 else 255,g if g<= 255 else 255,b if b<= 255 else 255)
+        lista.append(tempColor)
+    global colores
+    colores =  lista
+    limpiarVentana()
+    dibujar()
+
+def cambiarColorPaleta():
+    window = Tk.Toplevel(root)
+    btnPaletaAzul = Tk.Button(master=window, text='Paleta azules', command=partial(crearPaletaAzules,len(cols)))
+    btnPaletaAzul.pack(side=Tk.TOP)
+    btnPaletaVerdes = Tk.Button(master=window, text='Paleta verdes', command=partial(crearPaletaVerdes,len(cols)))
+    btnPaletaVerdes.pack(side=Tk.TOP)
+    btnPaletaRojos = Tk.Button(master=window, text='Paleta rojos', command=partial(crearPaletaRojos,len(cols)))
+    btnPaletaRojos.pack(side=Tk.TOP)
+    
 
 def cambiarColor():
     window = Tk.Toplevel(root)
