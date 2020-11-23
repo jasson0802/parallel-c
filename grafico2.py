@@ -22,7 +22,10 @@ else:
 def crearListaColore(cantidad):
     lista = []
     for x in range(cantidad):
-        tempColor = rgb2hex(random.randint(1, 30)*x, random.randint(1, 30)*x, random.randint(1, 30)*x)
+        r = random.randint(1, 30)*x
+        g = random.randint(1, 30)*x
+        b = random.randint(1, 30)*x
+        tempColor = rgb2hex(r if r<= 255 else 255, g if g<= 255 else 255, b if b<= 255 else 255)
         lista.append(tempColor)
 
     print lista
@@ -65,6 +68,7 @@ cols = cols[2:]
 categoria = 'mpg'
 
 valoresCategoria = df[categoria]
+dfOriginal = df
 
 listaEscala = crearListaEscala(valoresCategoria, len(cols))
 
@@ -97,9 +101,13 @@ def set_ticks_for_axis(dim, ax, ticks):
 #Metodo principal donde se dibujan todos los elementos
 def dibujar():
     #Asignar los datos a variable df
-    
     global listaEscala
     listaEscala = crearListaEscala(valoresCategoria, len(cols))
+
+    global df
+    df = pd.read_csv(file.name)
+
+    df[categoria] = pd.cut(valoresCategoria, listaEscala)
     
     x = [i for i, _ in enumerate(cols)]
 
@@ -114,6 +122,7 @@ def dibujar():
         global min_max_range
         min_max_range[col] = [df[col].min(), df[col].max(), np.ptp(df[col])]
         df[col] = np.true_divide(df[col] - df[col].min(), np.ptp(df[col]))
+
 
     # Dibujar cada linea basado en valor de categoria
     for i, ax in enumerate(axes):
