@@ -57,6 +57,12 @@ global df
 df = pd.read_csv(file.name)
 #pd.set_option('display.max_columns', None)
 
+global grosorEjes
+grosorEjes = 10
+
+global colorEjes
+colorEjes = "gold"
+
 #Leer los titulos de las columnas
 global cols 
 cols = []
@@ -136,6 +142,10 @@ def dibujar():
             #Dibujar una linea entre cada columna para la fila dada
             ax.plot(x, df.loc[idx, cols],colours[mpg_category],linewidth=grosor) #Aqui se cambia el grueso de la linea
         ax.set_xlim([x[i], x[i+1]])
+        for axis in ['left','right']:
+            ax.spines[axis].set_linewidth(grosorEjes)
+            ax.spines[axis].set_color(colorEjes)
+            ax.spines[axis].set_zorder(0)
 
 
     # Dibujar escala al lado derecho
@@ -150,6 +160,7 @@ def dibujar():
 
     #Creacion componentes tkinter
     plt.rcParams['toolbar'] = 'None'
+    plt.rcParams['axes.linewidth'] = 10
 
     global canvas
     canvas = FigureCanvasTkAgg(fig, master=root)
