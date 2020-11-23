@@ -24,17 +24,20 @@ def crearListaColore(cantidad):
     for x in range(cantidad):
         tempColor = rgb2hex(random.randint(1, 30)*x, random.randint(1, 30)*x, random.randint(1, 30)*x)
         lista.append(tempColor)
+
     print lista
     return lista
 
-def crearListaEscala(cantidad):
-    lista=[]
-    if(cantidad == 7):
-        lista=[0,8, 16, 24, 32, 50,60]
-    elif(cantidad == 6):
-        lista=[0,8, 16, 24, 32, 50]
-    elif(cantidad == 5):
-        lista=[0,8, 16, 24, 32, 50]
+def crearListaEscala(listaValores, cantidad):
+    mayor = listaValores.values.tolist()[-1]
+    aumento = int(mayor/cantidad + 1)
+    rangoActual = 0
+    lista = []
+
+    for x in range(cantidad + 1):
+        lista.append(rangoActual)
+        rangoActual += aumento
+
     return lista
 
 #Creacion de ventana tkinter
@@ -61,10 +64,12 @@ cols = cols[2:]
 
 categoria = 'mpg'
 
-listaEscala = crearListaEscala(len(cols)+1)
+valoresCategoria = df[categoria]
+
+listaEscala = crearListaEscala(valoresCategoria, len(cols))
 
 #Reducir valores de columna a evaluar
-df[categoria] = pd.cut(df[categoria], listaEscala)
+df[categoria] = pd.cut(valoresCategoria, listaEscala)
 
 #Asignacion de variables globales
 
@@ -92,8 +97,9 @@ def set_ticks_for_axis(dim, ax, ticks):
 #Metodo principal donde se dibujan todos los elementos
 def dibujar():
     #Asignar los datos a variable df
+    
     global listaEscala
-    listaEscala = crearListaEscala(len(cols)+1)
+    listaEscala = crearListaEscala(valoresCategoria, len(cols))
     
     x = [i for i, _ in enumerate(cols)]
 
@@ -200,7 +206,7 @@ def cargar_archivo():
     for linea in df:
         cols.append(linea)
     cols = cols[2:]
-    listaEscala = crearListaEscala(len(cols)+1)
+    listaEscala = crearListaEscala(valoresCategoria)
     df[categoria] = pd.cut(df[categoria], listaEscala)
     if canvas != {}:
         #Si el canvas ya existe borra todos los elementos de tkinter
