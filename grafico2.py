@@ -71,11 +71,15 @@ for linea in df:
 cols = cols[2:]
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 global oldCols
 oldCols = [] + cols
 
 global bandera
 bandera = True
+=======
+
+>>>>>>> 97ed06b6e7cefc5e1161608e61b322d4a1b4d0c5
 =======
 
 >>>>>>> 97ed06b6e7cefc5e1161608e61b322d4a1b4d0c5
@@ -171,7 +175,12 @@ def dibujar():
             #Extraer el mpg de la fila
             mpg_category = df.loc[idx, categoria]
 <<<<<<< HEAD
+<<<<<<< HEAD
             
+=======
+            #print categoria
+            #print idx
+>>>>>>> 97ed06b6e7cefc5e1161608e61b322d4a1b4d0c5
 =======
             #print categoria
             #print idx
