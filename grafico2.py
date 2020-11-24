@@ -70,6 +70,11 @@ for linea in df:
     
 cols = cols[2:]
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 2b98de1... Add category
 global oldCols
 oldCols = [] + cols
 
