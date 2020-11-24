@@ -70,19 +70,12 @@ for linea in df:
     
 cols = cols[2:]
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 global oldCols
 oldCols = [] + cols
 
 global bandera
 bandera = True
-=======
 
->>>>>>> 97ed06b6e7cefc5e1161608e61b322d4a1b4d0c5
-=======
-
->>>>>>> 97ed06b6e7cefc5e1161608e61b322d4a1b4d0c5
 categoria = 'mpg'
 
 valoresCategoria = df[categoria]
@@ -174,17 +167,7 @@ def dibujar():
         for idx in df.index:
             #Extraer el mpg de la fila
             mpg_category = df.loc[idx, categoria]
-<<<<<<< HEAD
-<<<<<<< HEAD
-            
-=======
-            #print categoria
-            #print idx
->>>>>>> 97ed06b6e7cefc5e1161608e61b322d4a1b4d0c5
-=======
-            #print categoria
-            #print idx
->>>>>>> 97ed06b6e7cefc5e1161608e61b322d4a1b4d0c5
+
             #Dibujar una linea entre cada columna para la fila dada
             ax.plot(x, df.loc[idx, cols],colours[mpg_category],linewidth=grosor) #Aqui se cambia el grueso de la linea
         ax.set_xlim([x[i], x[i+1]])
