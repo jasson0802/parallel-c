@@ -70,12 +70,12 @@ for linea in df:
     
 cols = cols[2:]
 
-
 global oldCols
 oldCols = [] + cols
 
 global bandera
 bandera = True
+
 categoria = 'mpg'
 
 valoresCategoria = df[categoria]
