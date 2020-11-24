@@ -67,19 +67,8 @@ global cols
 cols = []
 for linea in df:
     cols.append(linea)
-    
 cols = cols[2:]
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 2b98de1... Add category
-global oldCols
-oldCols = [] + cols
-
-global bandera
-bandera = True
 
 categoria = 'mpg'
 
@@ -124,19 +113,6 @@ def set_ticks_for_axis(dim, ax, ticks):
 
 #Metodo principal donde se dibujan todos los elementos
 def dibujar():
-    global cols
-    cols = oldCols
-
-    tempCols = []
-    for x in cols:
-        if x == categoria:
-            continue
-        else:
-            tempCols.append(x)
-
-    global cols
-    cols = tempCols
-    
     #Asignar los datos a variable df
     global listaEscala
     listaEscala = crearListaEscala(valoresCategoria, len(cols))
@@ -144,12 +120,6 @@ def dibujar():
     global df
     df = pd.read_csv(file.name)
 
-    global valoresCategoria
-    valoresCategoria = df[categoria]
-
-    listaEscala = crearListaEscala(valoresCategoria, len(cols))
-
-    #Reducir valores de columna a evaluar
     df[categoria] = pd.cut(valoresCategoria, listaEscala)
     
     x = [i for i, _ in enumerate(cols)]
@@ -172,7 +142,8 @@ def dibujar():
         for idx in df.index:
             #Extraer el mpg de la fila
             mpg_category = df.loc[idx, categoria]
-
+            #print categoria
+            #print idx
             #Dibujar una linea entre cada columna para la fila dada
             ax.plot(x, df.loc[idx, cols],colours[mpg_category],linewidth=grosor) #Aqui se cambia el grueso de la linea
         ax.set_xlim([x[i], x[i+1]])
@@ -235,12 +206,6 @@ def dibujar():
     Escala.pack(side=Tk.TOP)
     botonEscala= Tk.Button(master=root, text='Cambiar Escala')
     botonEscala.pack(side=Tk.TOP)
-
-    Categoria = Tk.Label(master=root, text="Categoria")
-    Categoria.pack(side=Tk.TOP)
-
-    botonOrdenEjes= Tk.Button(master=root, text='Cambiar categoria', command=ventanaCategoria)
-    botonOrdenEjes.pack(side=Tk.TOP)
     
     botonSalir = Tk.Button(master=root, text='Cerrar', command=_quit)
     botonSalir.pack(side=Tk.TOP)
@@ -272,30 +237,6 @@ def cambiarGrosor():
     w.pack()
     botonAceptar = Tk.Button(window, text='Aceptar', command=partial(aceptar,w))
     botonAceptar.pack()
-
-def ventanaCategoria():
-    posX = 200
-    posY = 200
-    window = Tk.Toplevel(root)
-    window.geometry('1000x500')
-
-    tempCols = [categoria]
-    tempCols += cols
-    
-    for nombreCol in tempCols:
-        tempLabel = Tk.Label(window,text=nombreCol)
-        btnCat = Tk.Button(window,text="Seleccionar" , command = partial(seleccionarCategoria, nombreCol))
-        tempLabel.pack()
-        tempLabel.place(x =posX, y = posY)
-        btnCat.place(x =posX-10, y = posY+ 50)
-        posX += 100
-
-
-def seleccionarCategoria(nombreCol):
-    global categoria
-    categoria = nombreCol
-    limpiarVentana()
-    dibujar()
     
 def aceptar(w):
     global grosor
@@ -342,6 +283,12 @@ def ventanaOrden():
         btnIzq.place(x =posX-10, y = posY+ 50)
         btnDer.place(x =posX+10, y = posY+ 50);
         posX += 100
+
+
+
+
+
+
 
 def crearPaletaAzules(cantidad):
     lista = []
